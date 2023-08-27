@@ -4,6 +4,7 @@
     import CellWithInfo from "./CellWithInfo.svelte";
     import { Graphic, Label } from "@smui/list";
     import Button, { Icon } from "@smui/button";
+    import { formatSats, formatFee, formatPayreq, endpoint } from "$lib";
 
     interface Info {
         synced: boolean;
@@ -27,7 +28,6 @@
         };
     }
 
-    const endpoint = "http://localhost:8000/api";
     let info: Info | undefined = undefined;
     let payreq: string | undefined = undefined;
 
@@ -38,21 +38,6 @@
         } catch (err) {
             console.log(err);
         }
-    }
-
-    const formatSats = (sats: number) =>
-        new Intl.NumberFormat("pt-BR", {
-            style: "currency",
-            currency: "BTC",
-            currencyDisplay: "narrowSymbol",
-            signDisplay: "always",
-            minimumFractionDigits: 8,
-        })
-            .format(sats / 1e8)
-            .replace("BTC", "₿");
-
-    function formatFee(fee: number): string {
-        return `${fee} sat/vB`;
     }
 
     async function copyPubkey() {
@@ -76,10 +61,6 @@
         } catch (err) {
             console.log(err);
         }
-    }
-
-    function formatPayreq(payreq: string): string {
-        return payreq.slice(0, 10) + "..." + payreq.slice(-10);
     }
 
     async function copyPayreq() {
