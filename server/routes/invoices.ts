@@ -9,7 +9,7 @@ router.get('/', async (_, res) => {
         const invoice = await createInvoice({ lnd });
         const payreq = invoice.request;
 
-        return res.send(payreq);
+        return res.send({ payreq });
     } catch (err) {
         return res.status(500).send(err);
     }

@@ -27,11 +27,13 @@
         };
     }
 
+    const endpoint = "http://localhost:8000/api";
     let info: Info | undefined = undefined;
+    let payreq: string | undefined = undefined;
 
     async function fetchInfo(): Promise<void> {
         try {
-            const res = await fetch("http://localhost:8000/api/info");
+            const res = await fetch(`${endpoint}/info`);
             info = await res.json();
         } catch (err) {
             console.log(err);
@@ -53,7 +55,7 @@
         return `${fee} sat/vB`;
     }
 
-    async function copyToCliboard() {
+    async function copyPubkey() {
         try {
             if (!info) {
                 return;
@@ -66,6 +68,31 @@
     }
 
     onMount(async () => await fetchInfo());
+
+    async function fetchInvoice(): Promise<void> {
+        try {
+            const res = await fetch(`${endpoint}/invoices`);
+            payreq = (await res.json()).payreq;
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    function formatPayreq(payreq: string): string {
+        return payreq.slice(0, 10) + "..." + payreq.slice(-10);
+    }
+
+    async function copyPayreq() {
+        try {
+            if (!payreq) {
+                return;
+            }
+
+            await navigator.clipboard.writeText(payreq);
+        } catch (err) {
+            console.log(err);
+        }
+    }
 </script>
 
 <div class="container">
@@ -191,32 +218,45 @@
             </DataTable>
         </div>
 
-        {#if info.pubkey}
-            <div style="margin-top: 20px;">
-                <h2>Conectar</h2>
-                <Button on:click={copyToCliboard}>
-                    <Icon class="material-icons">copy_all</Icon>
-                    <Label>{info.pubkey}</Label>
-                </Button>
-                <div>
-                    <a
-                        href={`https://mempool.space/lightning/node/${info.pubkey}`}
-                        target="_blank"
-                        rel="noreferrer">Mempool</a
-                    >
-                    <a
-                        href={`https://amboss.space/node/${info.pubkey}`}
-                        target="_blank"
-                        rel="noreferrer">Amboss</a
-                    >
-                    <a
-                        href={`https://1ml.com/node/${info.pubkey}`}
-                        target="_blank"
-                        rel="noreferrer">1ml</a
-                    >
+        <div style="margin-top: 20px;">
+            <Button on:click={fetchInvoice}>
+                <Icon class="material-icons">copy_all</Icon>
+                <Label>Gerar Invoice</Label>
+            </Button>
+            {#if payreq}
+                <div style="display: flex;">
+                    <p>{formatPayreq(payreq)}</p>
+                    <Button on:click={copyPayreq}>
+                        <Icon class="material-icons">copy_all</Icon>
+                    </Button>
                 </div>
+            {/if}
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h2>Conectar</h2>
+            <Button on:click={copyPubkey}>
+                <Icon class="material-icons">copy_all</Icon>
+                <Label>{info.pubkey}</Label>
+            </Button>
+            <div>
+                <a
+                    href={`https://mempool.space/lightning/node/${info.pubkey}`}
+                    target="_blank"
+                    rel="noreferrer">Mempool</a
+                >
+                <a
+                    href={`https://amboss.space/node/${info.pubkey}`}
+                    target="_blank"
+                    rel="noreferrer">Amboss</a
+                >
+                <a
+                    href={`https://1ml.com/node/${info.pubkey}`}
+                    target="_blank"
+                    rel="noreferrer">1ml</a
+                >
             </div>
-        {/if}
+        </div>
 
         <div>
             <h2>Taxas (sat/vByte)</h2>
