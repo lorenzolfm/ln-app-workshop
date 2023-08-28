@@ -1,4 +1,4 @@
-export const endpoint = "http://localhost:8000/api";
+export const endpoint = "http://localhost:8080/api"; // TODO: Get from env
 
 export const formatSats = (sats: number) =>
     new Intl.NumberFormat("pt-BR", {
