@@ -41,8 +41,8 @@
             const { pubkey, host } = parseAddress(address);
 
             const body = {
-                pubkey: pubkey,
-                host: host,
+                pubkey,
+                host,
             };
 
             const response = await fetch(`${endpoint}/network/connect`, {

@@ -4,6 +4,7 @@
     import type { PageData } from "./$types";
     import DataTable, { Cell, Head, Row } from "@smui/data-table";
     import CellWithInfo from "../../CellWithInfo.svelte";
+    import Button from "@smui/button";
 
     export let data: PageData;
 
@@ -33,6 +34,32 @@
         try {
             const res = await fetch(`${endpoint}/channels/${data.pubkey}`);
             channel = await res.json();
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    async function closeChannel(): Promise<void> {
+        try {
+            if (!channel) {
+                return;
+            }
+
+            const body = {
+                id: channel.id,
+            };
+
+            const res = await fetch(`${endpoint}/channels/close`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(body),
+            });
+
+            if (!res.ok) {
+                console.log(`${res.status}`);
+            }
         } catch (err) {
             console.log(err);
         }
@@ -109,6 +136,11 @@
                 </Row>
             {/if}
         </DataTable>
+        <Button
+            on:click={closeChannel}
+            variant="outlined"
+            style="margin-top: 10px;">Fechar Canal</Button
+        >
     {/if}
 </div>
 
