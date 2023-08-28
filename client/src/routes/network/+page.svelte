@@ -63,6 +63,14 @@
         }
     }
 
+    async function copyPubkey(pubkey: string) {
+        try {
+            await navigator.clipboard.writeText(pubkey);
+        } catch (err) {
+            console.error("Failed to copy text: ", err);
+        }
+    }
+
     $: disabled = address === "";
 </script>
 
@@ -101,7 +109,8 @@
             </Head>
             {#each peers as p}
                 <Row>
-                    <Cell>{p.pubkey}</Cell>
+                    <Cell on:click={() => copyPubkey(p.pubkey)}>{p.pubkey}</Cell
+                    >
                     <Cell>{p.socket}</Cell>
                     <Cell>
                         <IconButton

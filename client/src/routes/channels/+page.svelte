@@ -14,6 +14,7 @@
     import BalanceTable from "./BalanceTable.svelte";
     import IconButton from "@smui/icon-button";
     import { endpoint, formatSats, formatPercent } from "$lib";
+    import Button from "@smui/button";
 
     interface ChannelDetails {
         openChannelsCount: number;
@@ -78,6 +79,10 @@
 
     let sort: SortOptions = SortOptions.Capacity;
     let sortDirection: Lowercase<keyof typeof SortValue> = "ascending";
+
+    let amountSats = 0;
+    let pubkey = "";
+    let disabled = true;
 
     onMount(async () => fetchChannels());
 
@@ -170,7 +175,41 @@
         }
     }
 
+    async function openChannel(): Promise<void> {
+        try {
+            const body = {
+                amountSats,
+                pubkey,
+            };
+
+            const res = await fetch(`${endpoint}/channels/open`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(body),
+            });
+
+            if (!res.ok) {
+                console.log(`${res.status}`);
+            }
+
+            return await fetchChannels();
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    function isOpenChannelButtonDisabled(pubkey: string, amountSats: number) {
+        if (typeof amountSats != "number") {
+            return false;
+        }
+
+        return pubkey === "" || amountSats < 20000;
+    }
+
     $: filterChannels(selectedStatus.value, searchTerm);
+    $: disabled = isOpenChannelButtonDisabled(pubkey, amountSats);
 </script>
 
 <div class="container">
@@ -241,13 +280,29 @@
             />
         </div>
 
+        <h2>Abrir canal</h2>
+
+        <div style="margin-bottom: 10px;">
+            <Textfield variant="outlined" bind:value={pubkey} label="pubkey" />
+            <Textfield
+                variant="outlined"
+                bind:value={amountSats}
+                label="Sats"
+                type="number"
+            />
+            <Button on:click={openChannel} variant="raised" {disabled}>
+                Abrir Canal
+            </Button>
+        </div>
+
         <h2>Canais</h2>
 
         <div style="margin-bottom: 10px">
             <Textfield
                 variant="outlined"
                 bind:value={searchTerm}
-                style="width: 50%; margin-top: 5px;"
+                style="width: 100%; margin-top: 5px;"
+                label="Filtrar"
             />
             <SegmentedButton
                 bind:selected={selectedStatus}
