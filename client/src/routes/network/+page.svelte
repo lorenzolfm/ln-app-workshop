@@ -1,14 +1,19 @@
 <script lang="ts">
     import { endpoint } from "$lib";
     import DataTable, { Cell, Head, Row } from "@smui/data-table";
+    import IconButton from "@smui/icon-button";
     import { onMount } from "svelte";
     import CellWithInfo from "../CellWithInfo.svelte";
+    import Textfield from "@smui/textfield";
+    import Button from "@smui/button";
+    import { parseAddress } from "$lib";
 
     interface Peer {
         pubkey: string;
         socket: string;
     }
 
+    let address: string = "";
     let peers: Peer[] | undefined = undefined;
 
     onMount(async () => await fetchPeers());
@@ -21,10 +26,61 @@
             console.log(err);
         }
     }
+
+    async function disconnect(pubkey: string) {
+        try {
+            await fetch(`${endpoint}/network/disconnect/${pubkey}`);
+            await fetchPeers();
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    async function connect(address: string) {
+        try {
+            const { pubkey, host } = parseAddress(address);
+
+            const body = {
+                pubkey: pubkey,
+                host: host,
+            };
+
+            const response = await fetch(`${endpoint}/network/connect`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(body),
+            });
+
+            if (!response.ok) {
+                console.log(`${response.status}`);
+            }
+
+            return await fetchPeers();
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    $: disabled = address === "";
 </script>
 
 <div class="container">
     <h2>Pares</h2>
+    <div class="field-container">
+        <Textfield
+            variant="outlined"
+            bind:value={address}
+            style="width: 100%"
+        />
+
+        <Button on:click={() => connect(address)} variant="raised" {disabled}
+            >Conectar</Button
+        >
+        <Button on:click={fetchPeers} variant="raised">Recarregar</Button>
+    </div>
+
     {#if peers}
         <DataTable>
             <Head>
@@ -37,12 +93,23 @@
                         title="📡 Host"
                         description="Endpoint do par"
                     />
+                    <CellWithInfo
+                        title="🙅 Disconnet"
+                        description="Click to disconnet peer"
+                    />
                 </Row>
             </Head>
             {#each peers as p}
                 <Row>
                     <Cell>{p.pubkey}</Cell>
                     <Cell>{p.socket}</Cell>
+                    <Cell>
+                        <IconButton
+                            class="material-icons"
+                            on:click={() => disconnect(p.pubkey)}
+                            >wifi_off</IconButton
+                        >
+                    </Cell>
                 </Row>
             {/each}
         </DataTable>
@@ -54,5 +121,9 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+    .field-container {
+        flex: 1;
+        margin: 20px;
     }
 </style>

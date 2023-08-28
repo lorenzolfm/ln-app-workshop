@@ -19,7 +19,13 @@ async function listPeers(): Promise<ListPeersResponse> {
     return { peers: peers.map((p) => ({ pubkey: p.public_key, socket: p.socket })) };
 }
 
-router.get('/', async (_, res) => res.send(await listPeers()));
+router.get('/', async (_, res) => {
+    try {
+        return res.send(await listPeers());
+    } catch (err) {
+        return res.status(500).send(err);
+    }
+});
 
 export interface ConnectRequest extends Request {
     body: {
@@ -47,7 +53,7 @@ router.get('/disconnect/:pubkey', async (req, res) => {
 
         await removePeer({ lnd, public_key: pubkey });
 
-        return res.status(200).send("Disonnected");
+        return res.status(200).send("Disconnected");
     } catch (err) {
         return res.status(500).send(`${err}`);
     }
