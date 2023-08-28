@@ -94,10 +94,6 @@
         }
     }
 
-    function mempoolSpaceLink(pubkey: string): string {
-        return `https://mempool.space/lightning/node/${pubkey}`;
-    }
-
     function formatPeerPubKey(pubkey: string): string {
         return pubkey.slice(0, 5) + "..." + pubkey.slice(-5);
     }
@@ -325,13 +321,13 @@
                 {#each channels as c}
                     <Row>
                         <Cell>
-                            <a
-                                href={mempoolSpaceLink(c.peer)}
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                {formatPeerPubKey(c.peer)}</a
-                            >
+                            {#if c.channelId}
+                                <a href={`/channel/${c.channelId}`}>
+                                    {formatPeerPubKey(c.peer)}</a
+                                >
+                            {:else}
+                                <p>{formatPeerPubKey(c.peer)}</p>
+                            {/if}
                         </Cell>
                         <Cell>{mapStatus(c.status)}</Cell>
                         <Cell>{formatSats(c.capacity)}</Cell>
