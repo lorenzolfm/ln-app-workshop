@@ -4,14 +4,19 @@ import { lnd } from "../lnd";
 
 const router = Router();
 
-export interface ListPeersResponse {
-    peers: string[],
+interface Peer {
+    pubkey: string,
+    socket: string,
+}
+
+interface ListPeersResponse {
+    peers: Peer[],
 }
 
 async function listPeers(): Promise<ListPeersResponse> {
     const peers = (await getPeers({ lnd })).peers;
 
-    return { peers: peers.map((p) => p.public_key) };
+    return { peers: peers.map((p) => ({ pubkey: p.public_key, socket: p.socket })) };
 }
 
 router.get('/', async (_, res) => res.send(await listPeers()));
