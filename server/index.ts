@@ -14,4 +14,4 @@ const app = express();
 app.use(cors());
 routes(app);
 
-app.listen(env.port, () => console.log(`listening on ${env.port}`));
+app.listen(env.PORT, () => console.log(`listening on port ${env.PORT}`));
