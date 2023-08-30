@@ -1,30 +1,22 @@
-import * as dotenv from "dotenv";
+import "dotenv/config";
+import { z } from "zod";
 
-interface Env {
-    port: number,
-    cert: string,
-    socket: string,
-    macaroon: string,
-}
+export const envSchema = z.object({
+    PORT: z.coerce.number(),
+    LND_SOCKET: z.string(),
+    LND_CERT: z.string(),
+    LND_MACAROON: z.string(),
+});
 
-function getEnv(): Env {
-    dotenv.config();
+function getEnv() {
+    const parsedEnv = envSchema.safeParse(process.env);
 
-    if (
-        !process.env.PORT ||
-        !process.env.LND_SOCKET ||
-        !process.env.LND_CERT ||
-        !process.env.LND_MACAROON
-    ) {
+    if (!parsedEnv.success) {
+        console.error(parsedEnv.error.format());
         throw new Error("You've missed something on your env");
     }
 
-    return {
-        port: parseInt(process.env.PORT),
-        cert: process.env.LND_CERT,
-        macaroon: process.env.LND_MACAROON,
-        socket: process.env.LND_SOCKET
-    };
+    return parsedEnv.data;
 }
 
 export const env = getEnv();
