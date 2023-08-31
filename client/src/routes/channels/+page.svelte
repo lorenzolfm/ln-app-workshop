@@ -15,50 +15,11 @@
     import IconButton from "@smui/icon-button";
     import { endpoint, formatSats, formatPercent } from "$lib";
     import Button from "@smui/button";
+    import type { Channels, Channel } from "../../../../server/types";
+    import { ChannelStatus } from "../../../../server/types";
 
-    interface ChannelDetails {
-        openChannelsCount: number;
-        activeChannelsCount: number;
-        inactiveChannelsCount: number;
-        pendingChannelsCount: number;
-        closedChannelsCount: number;
-
-        totalCapacity: number;
-        totalActiveCapacity: number;
-        totalInactiveCapacity: number;
-        totalPendingCapacity: number;
-        totalLocalBalance: number;
-        totalRemoteBalance: number;
-        activeLocalBalance: number;
-        activeRemoteBalance: number;
-        inactiveLocalBalance: number;
-        inactiveRemoteBalance: number;
-        pendingLocalBalance: number;
-        pendingRemoteBalance: number;
-
-        channels: Channel[];
-    }
-
-    interface Channel {
-        peer: string;
-        status: ChannelStatus;
-        capacity: number;
-        localBalance: number;
-        remoteBalance: number;
-        balanceRatio: number;
-        channelId?: string;
-    }
-
-    enum ChannelStatus {
-        Active,
-        Inactive,
-        Pending,
-        Closed,
-        UNRECOGNIZED,
-    }
-
-    const status: { name: string; value: ChannelStatus }[] = [
-        { name: "🌐 Todos", value: ChannelStatus.UNRECOGNIZED },
+    const status: { name: string; value?: ChannelStatus }[] = [
+        { name: "🌐 Todos" },
         { name: "✅ Ativos", value: ChannelStatus.Active },
         { name: "💤 Inativos", value: ChannelStatus.Inactive },
         { name: "⏳ Pendentes", value: ChannelStatus.Pending },
@@ -74,7 +35,7 @@
     }
 
     let searchTerm = "";
-    let channelDetails: ChannelDetails | undefined = undefined;
+    let channelDetails: Channels | undefined = undefined;
     let channels: Channel[] = [];
 
     let sort: SortOptions = SortOptions.Capacity;
@@ -89,8 +50,8 @@
     async function fetchChannels(): Promise<void> {
         try {
             const res = await fetch(`${endpoint}/channels`);
-
             channelDetails = await res.json();
+
             if (channelDetails) {
                 channels = channelDetails.channels;
             }
@@ -118,10 +79,13 @@
         }
     }
 
-    function filterChannels(target: ChannelStatus, searchTerm: string): void {
+    function filterChannels(
+        target: ChannelStatus | undefined,
+        searchTerm: string
+    ): void {
         if (channelDetails?.channels === undefined) return;
 
-        if (target === ChannelStatus.UNRECOGNIZED) {
+        if (!target) {
             channels =
                 searchTerm === ""
                     ? channelDetails.channels

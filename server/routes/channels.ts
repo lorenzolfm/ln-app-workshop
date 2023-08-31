@@ -1,48 +1,9 @@
 import { Request, Router } from "express";
 import { closeChannel, getChannel, getChannels, getClosedChannels, getPendingChannels, openChannel } from "lightning";
 import { lnd } from "../lnd";
+import { Channel, ChannelInfo, ChannelStatus, Channels } from "../types";
 
-interface GetChannelsResponse {
-    openChannelsCount: number,
-    activeChannelsCount: number,
-    inactiveChannelsCount: number,
-    pendingChannelsCount: number,
-    closedChannelsCount: number,
-
-    totalCapacity: number,
-    totalActiveCapacity: number,
-    totalInactiveCapacity: number,
-    totalPendingCapacity: number,
-    totalLocalBalance: number,
-    totalRemoteBalance: number,
-    activeLocalBalance: number,
-    activeRemoteBalance: number,
-    inactiveLocalBalance: number,
-    inactiveRemoteBalance: number,
-    pendingLocalBalance: number,
-    pendingRemoteBalance: number,
-
-    channels: Channel[],
-}
-
-interface Channel {
-    peer: string,
-    status: ChannelStatus,
-    capacity: number,
-    localBalance: number,
-    remoteBalance: number,
-    balanceRatio: number,
-    channelId?: string,
-}
-
-enum ChannelStatus {
-    Active,
-    Inactive,
-    Pending,
-    Closed,
-}
-
-async function listChannels(): Promise<GetChannelsResponse> {
+async function listChannels(): Promise<Channels> {
     let activeChannelsCount = 0;
     let inactiveChannelsCount = 0;
     let pendingChannelsCount = 0;
@@ -183,24 +144,6 @@ router.get('/', async (_, res) => {
     }
 });
 
-interface GetChannelResponse {
-    id: string;
-    capacity: number;
-    policy?: {
-        base_fee_mtokens?: string;
-        cltv_delta?: number;
-        fee_rate?: number;
-        is_disabled?: boolean;
-        max_htlc_mtokens?: string;
-        min_htlc_mtokens?: string;
-        public_key: string;
-        updated_at?: string;
-    }
-    transaction_id: string;
-    transaction_vout: number;
-    updated_at?: string;
-}
-
 router.get('/:id', async (req, res) => {
     try {
         const id = req.params.id;
@@ -209,7 +152,7 @@ router.get('/:id', async (req, res) => {
 
         const policy = channel.policies.at(-1);
 
-        const body: GetChannelResponse = {
+        const body: ChannelInfo = {
             id: channel.id,
             capacity: channel.capacity,
             policy: {

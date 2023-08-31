@@ -2,30 +2,9 @@ import { Router } from "express";
 import { getChainBalance, getChannels, getPendingChainBalance, getPendingChannels, getWalletInfo } from "lightning";
 import { lnd } from "../lnd";
 import { getRecommendedFees } from "../mempooolspace";
+import { NodeInfo } from "../types";
 
-interface Info {
-    synced: boolean,
-    pubkey: string,
-    onChainBalance: {
-        confirmed: number,
-        pending: number,
-        total: number,
-    },
-    lightningBalance: {
-        available: number,
-        notAvailable: number,
-        pending: number,
-        total: number,
-    },
-    fees: {
-        fastest: number,
-        hour: number,
-        halfHour: number,
-        minimum: number,
-    }
-}
-
-async function getInfo(): Promise<Info> {
+async function getInfo(): Promise<NodeInfo> {
     const [
         { public_key, is_synced_to_chain },
         { chain_balance },

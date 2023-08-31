@@ -5,28 +5,10 @@
     import DataTable, { Cell, Head, Row } from "@smui/data-table";
     import CellWithInfo from "../../CellWithInfo.svelte";
     import Button from "@smui/button";
+    import type { ChannelInfo } from "../../../../../server/types";
 
     export let data: PageData;
-
-    interface Channel {
-        id: string;
-        capacity: number;
-        policy?: {
-            base_fee_mtokens?: string;
-            cltv_delta?: number;
-            fee_rate?: number;
-            is_disabled?: boolean;
-            max_htlc_mtokens?: string;
-            min_htlc_mtokens?: string;
-            public_key: string;
-            updated_at?: string;
-        };
-        transaction_id: string;
-        transaction_vout: number;
-        updated_at?: string;
-    }
-
-    let channel: Channel | undefined = undefined;
+    let channel: ChannelInfo | undefined = undefined;
 
     onMount(async () => await fetchChannel());
 

@@ -5,30 +5,9 @@
     import { Graphic, Label } from "@smui/list";
     import Button, { Icon } from "@smui/button";
     import { formatSats, formatFee, formatPayreq, endpoint } from "$lib";
+    import type { NodeInfo } from "../../../server/types";
 
-    interface Info {
-        synced: boolean;
-        pubkey: string;
-        onChainBalance: {
-            confirmed: number;
-            pending: number;
-            total: number;
-        };
-        lightningBalance: {
-            available: number;
-            notAvailable: number;
-            pending: number;
-            total: number;
-        };
-        fees: {
-            fastest: number;
-            hour: number;
-            halfHour: number;
-            minimum: number;
-        };
-    }
-
-    let info: Info | undefined = undefined;
+    let info: NodeInfo | undefined = undefined;
     let payreq: string | undefined = undefined;
 
     async function fetchInfo(): Promise<void> {
