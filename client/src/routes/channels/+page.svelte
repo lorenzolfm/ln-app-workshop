@@ -25,7 +25,7 @@
         { name: "⏳ Pendentes", value: ChannelStatus.Pending },
         { name: "🚫 Fechados", value: ChannelStatus.Closed },
     ];
-    let selectedStatus = status[1];
+    let selectedStatus = status[0];
 
     enum SortOptions {
         Capacity = "Capacity",
