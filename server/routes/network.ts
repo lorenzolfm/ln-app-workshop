@@ -1,19 +1,11 @@
 import { Router, Request } from "express";
 import { addPeer, getPeers, removePeer } from "lightning";
 import { lnd } from "../lnd";
+import { Peer } from "../types";
 
 const router = Router();
 
-interface Peer {
-    pubkey: string,
-    socket: string,
-}
-
-interface ListPeersResponse {
-    peers: Peer[],
-}
-
-async function listPeers(): Promise<ListPeersResponse> {
+async function listPeers(): Promise<{ peers: Peer[] }> {
     const peers = (await getPeers({ lnd })).peers;
 
     return { peers: peers.map((p) => ({ pubkey: p.public_key, socket: p.socket })) };

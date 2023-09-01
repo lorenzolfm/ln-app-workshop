@@ -7,11 +7,7 @@
     import Textfield from "@smui/textfield";
     import Button from "@smui/button";
     import { parseAddress } from "$lib";
-
-    interface Peer {
-        pubkey: string;
-        socket: string;
-    }
+    import type { Peer } from "../../../../server/types";
 
     let address: string = "";
     let peers: Peer[] | undefined = undefined;
