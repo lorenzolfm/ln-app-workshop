@@ -85,7 +85,7 @@
     ): void {
         if (channelDetails?.channels === undefined) return;
 
-        if (!target) {
+        if (target === undefined) {
             channels =
                 searchTerm === ""
                     ? channelDetails.channels
